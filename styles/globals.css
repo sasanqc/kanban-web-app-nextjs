@@ -2,26 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
+@layer base {
+  @font-face {
+    font-family: "Plus Jakarta Sans";
+    font-display: swap;
+    font-weight: 100 900;
+    src: url("/assets/font/Plus_Jakarta_Sans/PlusJakartaSans-VariableFont_wght.ttf")
+      format("truetype");
+  }
+  h1 {
+    @apply font-bold text-3xl;
+  }
+  h2 {
+    @apply font-bold text-2xl;
+  }
+  h3 {
+    @apply font-bold text-xl;
+  }
+  h4 {
+    @apply font-bold text-sm uppercase;
+    letter-spacing: 2.4px;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+  input[type="text"] {
+    @apply w-full border text-base border-gray2 focus:border-primary2 py-2 px-4 rounded-md outline-none  placeholder:text-black placeholder:opacity-25 focus:ring-0;
   }
 }
-
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+.modal-content {
+  @apply w-full md:min-w-[480px]  bg-white p-8 rounded-md;
 }
