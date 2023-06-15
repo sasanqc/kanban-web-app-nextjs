@@ -1,29 +1,37 @@
 import React from "react";
 import BoardIcon from "@/icons/icon-board.svg";
-const BoardsList = () => {
+import BoardListProps from "@/model/BoardListProps";
+const BoardsList: React.FC<BoardListProps> = ({
+  boards,
+  activeBoard = 0,
+  onChangedaActiveBoard,
+  onAddNewBoard,
+}) => {
   return (
     <div>
-      <h4 className="text-gray3 pl-8 mb-5 mt-4">all boards (3)</h4>
+      <h4 className="text-gray3 pl-8 mb-5 mt-4">
+        all boards ({boards.length})
+      </h4>
       <ul>
-        <li className=" flex pl-8 py-4 gap-x-4 mr-6 items-center text-white bg-primary2 rounded-r-full ">
-          <span>
-            <BoardIcon />
-          </span>
-          <h3>Platform Launch</h3>
-        </li>
-        <li className=" flex pl-8 py-4 gap-x-4 mr-6 items-center text-gray3  rounded-r-full ">
-          <span>
-            <BoardIcon />
-          </span>
-          <h3>Marketing Plan</h3>
-        </li>
-        <li className=" flex pl-8 py-4 gap-x-4 mr-6 items-center text-gray3  rounded-r-full ">
-          <span>
-            <BoardIcon />
-          </span>
-          <h3>Roadmap</h3>
-        </li>
-        <li className=" flex pl-8 py-4 gap-x-4 mr-6 items-center text-primary2  rounded-r-full ">
+        {boards.map((board, i) => (
+          <li
+            key={i}
+            className={`flex pl-8 py-4 gap-x-4 mr-6 items-center   rounded-r-full cursor-pointer  ${
+              activeBoard === i ? "bg-primary2 text-white" : "text-gray3"
+            }`}
+            onClick={() => onChangedaActiveBoard(i)}
+          >
+            <span>
+              <BoardIcon />
+            </span>
+            <h3>{board.name}</h3>
+          </li>
+        ))}
+
+        <li
+          className=" flex pl-8 py-4 gap-x-4 mr-6 items-center text-primary2  rounded-r-full cursor-pointer"
+          onClick={onAddNewBoard}
+        >
           <span>
             <BoardIcon />
           </span>

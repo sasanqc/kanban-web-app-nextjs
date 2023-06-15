@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import ChevronDownIcon from "@/icons/icon-chevron-down.svg";
 
 interface SelectProps {
@@ -16,7 +16,8 @@ const Select: React.FC<SelectProps> = ({ items, label, onChanged }) => {
     setIsOpen(true);
   };
 
-  const handleSelectedItem = (e: React.MouseEvent<HTMLUListElement>) => {
+  const handleSelectedItem = (e: MouseEvent) => {
+    e.stopPropagation();
     const value = (e.target as HTMLElement).getAttribute("data-value");
 
     if (value) {
@@ -25,16 +26,22 @@ const Select: React.FC<SelectProps> = ({ items, label, onChanged }) => {
       onChanged(value);
     }
   };
+  const handleClickOnWindow = useCallback((e: MouseEvent) => {
+    if (
+      dropDownRef.current &&
+      !dropDownRef.current.contains(e.target as Node)
+    ) {
+      setIsOpen(false);
+    }
+  }, []);
+
   useEffect(() => {
-    window.document.addEventListener("click", (e: MouseEvent) => {
-      if (
-        dropDownRef.current &&
-        !dropDownRef.current.contains(e.target as Node)
-      ) {
-        setIsOpen(false);
-      }
+    window.addEventListener("click", handleClickOnWindow, {
+      capture: false,
     });
-    return () => {};
+    return () => {
+      window.removeEventListener("click", handleClickOnWindow);
+    };
   }, []);
 
   return (
@@ -50,7 +57,7 @@ const Select: React.FC<SelectProps> = ({ items, label, onChanged }) => {
       </div>
       {isOpen && (
         <ul
-          className="bg-white p-4 text-gray3 absolute mt-2 rounded-lg w-full space-y-2 z-20"
+          className="bg-white dark:bg-black3 p-4 text-gray3 absolute mt-2 rounded-lg w-full space-y-2 z-20"
           onClick={handleSelectedItem}
         >
           {items.map((el) => (
