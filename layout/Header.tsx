@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import Button from "../components/UI/Button";
 import VerticalElipsisIcon from "@/icons/icon-vertical-ellipsis.svg";
 import LogoDarkIcon from "@/icons/logo-dark.svg";
@@ -6,7 +7,45 @@ import LogoMobileIcon from "@/icons/logo-mobile.svg";
 import ChevronDownIcon from "@/icons/icon-chevron-down.svg";
 import AddIcon from "@/icons/icon-add-task-mobile.svg";
 
-const Header = () => {
+interface HeaderProps {
+  handleEditBoard: () => void;
+  handleDeleteBoard: () => void;
+  handleAddNewTask: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({
+  handleEditBoard,
+  handleDeleteBoard,
+  handleAddNewTask,
+}) => {
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [menuIsOpoen, setMenuIsOpen] = useState(false);
+
+  const onEditBoard = () => {
+    setMenuIsOpen(false);
+    handleEditBoard();
+  };
+
+  const onDeleteBoard = () => {
+    setMenuIsOpen(false);
+    handleDeleteBoard();
+  };
+
+  const handleClickedOnBackdrop = (e: MouseEvent) => {
+    if (menuRef?.current && !menuRef?.current?.contains(e.target as Node)) {
+      setMenuIsOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    setTimeout(() => {
+      window.addEventListener("click", handleClickedOnBackdrop);
+    });
+    return () => {
+      window.removeEventListener("click", handleClickedOnBackdrop);
+    };
+  }, []);
+
   return (
     <div className="flex  items-center justify-between  ">
       {/* Desktop Header */}
@@ -21,9 +60,30 @@ const Header = () => {
             <Button
               label="+ Add New Task"
               type="primary large"
-              onClick={() => {}}
+              onClick={handleAddNewTask}
             />
-            <VerticalElipsisIcon className="mr-2 cursor-pointer" />
+            <div className="relative" ref={menuRef}>
+              <VerticalElipsisIcon
+                className="cursor-pointer"
+                onClick={() => setMenuIsOpen(true)}
+              />
+              {menuIsOpoen && (
+                <ul className="absolute text-base font-semibold bg-white right-0 mt-8 w-48 p-4 rounded-md space-y-4">
+                  <li
+                    className="text-gray3 cursor-pointer"
+                    onClick={onEditBoard}
+                  >
+                    Edit Board
+                  </li>
+                  <li
+                    className="text-destructive2 cursor-pointer"
+                    onClick={onDeleteBoard}
+                  >
+                    Delete Board
+                  </li>
+                </ul>
+              )}
+            </div>
           </div>
         </div>
       </div>

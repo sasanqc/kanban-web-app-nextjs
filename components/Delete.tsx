@@ -3,8 +3,15 @@ import Button from "./UI/Button";
 interface DeleteProps {
   title: string;
   description: string;
+  onConfirm: () => void;
+  onCancel: () => void;
 }
-const Delete: React.FC<DeleteProps> = ({ title, description }) => {
+const Delete: React.FC<DeleteProps> = ({
+  title,
+  description,
+  onConfirm,
+  onCancel,
+}) => {
   return (
     <div className=" modal-content">
       <h2 className="text-destructive2 mb-6">{title}</h2>
@@ -14,13 +21,13 @@ const Delete: React.FC<DeleteProps> = ({ title, description }) => {
           label={"Delete"}
           type={"small destructive"}
           classes={"w-full"}
-          onClick={() => {}}
+          onClick={onConfirm}
         />
         <Button
           label={"Cancel"}
           type={"small secondary"}
           classes={"w-full"}
-          onClick={() => {}}
+          onClick={onCancel}
         />
       </div>
     </div>

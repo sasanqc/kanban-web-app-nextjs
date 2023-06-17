@@ -1,11 +1,21 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import TextInput from "./UI/TextInput";
 import CrossIcon from "@/icons/icon-cross.svg";
 import Button from "./UI/Button";
-
-const CreateBoard = () => {
-  const [columns, setColumns] = useState(["", ""]);
-  const [name, setName] = useState("");
+import Board from "@/model/Board";
+interface ImperativeInput {
+  error: (message: string) => void;
+}
+interface CreateBoardProps {
+  board?: Board;
+  onCreateBoard: (board: Board) => void;
+}
+const CreateBoard: React.FC<CreateBoardProps> = ({ board, onCreateBoard }) => {
+  const [columns, setColumns] = useState(
+    board?.columns ? board.columns.map((el) => el.name) : ["", ""]
+  );
+  const [name, setName] = useState(board?.name || "");
+  const inputRef = useRef<ImperativeInput>(null);
 
   const handleDeleteColumn = (e: MouseEvent, index: number) => {
     e.stopPropagation();
@@ -27,21 +37,38 @@ const CreateBoard = () => {
     setColumns(updatedColumns);
   };
 
-  const onCreateNewBoard = () => {};
+  const onCreateNewBoard = () => {
+    if (name?.trim().length === 0) {
+      inputRef.current?.error("Can't be empty");
+      return;
+    }
+    onCreateBoard({
+      name,
+      columns: columns
+        .filter((el) => el.length > 0)
+        .map((el) => {
+          return { name: el, tasks: [] };
+        }),
+    });
+  };
   return (
     <div className="modal-content space-y-6 ">
-      <h2 className="text-black4 dark:text-white">Add New Board</h2>
+      <h2 className="text-black4 dark:text-white">{`${
+        board ? "Edit Board" : "Add New Board"
+      }`}</h2>
       <TextInput
         label={"Name"}
         placeholder={"e.g. Web Design"}
         name={"name"}
         value={name}
         onChange={onChangedName}
+        ref={inputRef}
       />
       <div className="mt-2 space-y-2 ">
         <label htmlFor="title" className="block  text-gray3 text-sm font-bold">
           Columns
         </label>
+
         <ul className="space-y-2 ">
           {columns.map((col, index) => (
             <li className="flex items-center " key={index}>
@@ -70,7 +97,7 @@ const CreateBoard = () => {
         />
       </div>
       <Button
-        label="Create New Board"
+        label={`${board ? "Save Changes" : "Create New Board"}`}
         onClick={onCreateNewBoard}
         classes={"w-full"}
         type={"primary small"}

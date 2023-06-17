@@ -23,10 +23,6 @@
     @apply font-bold text-sm uppercase;
     letter-spacing: 2.4px;
   }
-
-  input[type="text"] {
-    @apply w-full border text-base border-gray2 focus:border-primary2 py-2 px-4 rounded-md outline-none dark:bg-black2  dark:placeholder:text-gray3 placeholder:opacity-25 focus:ring-0;
-  }
 }
 .modal-content {
   @apply w-full md:min-w-[480px]  bg-white dark:bg-black2 p-8 rounded-md;
