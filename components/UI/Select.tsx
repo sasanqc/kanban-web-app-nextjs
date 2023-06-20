@@ -5,12 +5,18 @@ interface SelectProps {
   onChanged: (value: string) => void;
   label?: string;
   items: { label: string; value: string }[];
+  initialItem?: number;
 }
 
-const Select: React.FC<SelectProps> = ({ items, label, onChanged }) => {
+const Select: React.FC<SelectProps> = ({
+  items,
+  label,
+  onChanged,
+  initialItem,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropDownRef = useRef<HTMLDivElement>(null);
-  const [selected, setSelected] = useState(items?.[0].value);
+  const [selected, setSelected] = useState(items?.[initialItem || 0]?.value);
 
   const handleClickDropDown = () => {
     setIsOpen(true);
@@ -52,12 +58,14 @@ const Select: React.FC<SelectProps> = ({ items, label, onChanged }) => {
         className="border rounded-md border-gray2 cursor-pointer focus:border-primary2 px-4 py-2 flex items-center justify-between"
         onClick={handleClickDropDown}
       >
-        <p className="">{items?.find((el) => el.value === selected)?.label}</p>
+        <p className="text-base">
+          {items?.find((el) => el.value === selected)?.label}
+        </p>
         <ChevronDownIcon />
       </div>
       {isOpen && (
         <ul
-          className="bg-white dark:bg-black3 p-4 text-gray3 absolute mt-2 rounded-lg w-full space-y-2 z-20"
+          className="bg-white text-base dark:bg-black3 p-4 text-gray3 absolute mt-2 rounded-lg w-full space-y-2 z-20"
           onClick={handleSelectedItem}
         >
           {items.map((el) => (

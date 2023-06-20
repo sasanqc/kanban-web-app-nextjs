@@ -2,8 +2,9 @@ import Task from "@/model/Task";
 
 interface TaskColumnProps {
   col: { name: string; tasks: Task[] };
+  onClickedTask: (index: number) => void;
 }
-const TaskColumn: React.FC<TaskColumnProps> = ({ col }) => {
+const TaskColumn: React.FC<TaskColumnProps> = ({ col, onClickedTask }) => {
   const doneSubtasksNumber = (task: Task) => {
     return task.subtasks.filter((el) => el.isCompleted).length;
   };
@@ -18,7 +19,10 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ col }) => {
       <ul className="space-y-5 pb-6 ">
         {col.tasks.map((task, index) => (
           <li key={index}>
-            <section className="py-6 px-4 bg-white dark:bg-black2 rounded-lg shadow-task">
+            <section
+              className="py-6 px-4 bg-white dark:bg-black2 rounded-lg shadow-task cursor-pointer"
+              onClick={(e) => onClickedTask(index)}
+            >
               <h3 className="mb-2">{task.title}</h3>
               <p className="text-sm text-gray3  font-bold ">
                 {`${doneSubtasksNumber(task)} of ${

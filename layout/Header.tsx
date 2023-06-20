@@ -6,6 +6,7 @@ import LogoLightIcon from "@/icons/logo-light.svg";
 import LogoMobileIcon from "@/icons/logo-mobile.svg";
 import ChevronDownIcon from "@/icons/icon-chevron-down.svg";
 import AddIcon from "@/icons/icon-add-task-mobile.svg";
+import Dropdown from "@/components/UI/Dropdown";
 
 interface HeaderProps {
   handleEditBoard: () => void;
@@ -18,34 +19,6 @@ const Header: React.FC<HeaderProps> = ({
   handleDeleteBoard,
   handleAddNewTask,
 }) => {
-  const menuRef = useRef<HTMLDivElement>(null);
-  const [menuIsOpoen, setMenuIsOpen] = useState(false);
-
-  const onEditBoard = () => {
-    setMenuIsOpen(false);
-    handleEditBoard();
-  };
-
-  const onDeleteBoard = () => {
-    setMenuIsOpen(false);
-    handleDeleteBoard();
-  };
-
-  const handleClickedOnBackdrop = (e: MouseEvent) => {
-    if (menuRef?.current && !menuRef?.current?.contains(e.target as Node)) {
-      setMenuIsOpen(false);
-    }
-  };
-
-  useEffect(() => {
-    setTimeout(() => {
-      window.addEventListener("click", handleClickedOnBackdrop);
-    });
-    return () => {
-      window.removeEventListener("click", handleClickedOnBackdrop);
-    };
-  }, []);
-
   return (
     <div className="flex  items-center justify-between  ">
       {/* Desktop Header */}
@@ -62,28 +35,20 @@ const Header: React.FC<HeaderProps> = ({
               type="primary large"
               onClick={handleAddNewTask}
             />
-            <div className="relative" ref={menuRef}>
-              <VerticalElipsisIcon
-                className="cursor-pointer"
-                onClick={() => setMenuIsOpen(true)}
-              />
-              {menuIsOpoen && (
-                <ul className="absolute text-base font-semibold bg-white right-0 mt-8 w-48 p-4 rounded-md space-y-4">
-                  <li
-                    className="text-gray3 cursor-pointer"
-                    onClick={onEditBoard}
-                  >
-                    Edit Board
-                  </li>
-                  <li
-                    className="text-destructive2 cursor-pointer"
-                    onClick={onDeleteBoard}
-                  >
-                    Delete Board
-                  </li>
-                </ul>
-              )}
-            </div>
+            <Dropdown
+              items={[
+                {
+                  label: "Edit Board",
+                  onClick: handleEditBoard,
+                  className: "text-gray3",
+                },
+                {
+                  label: "Delete Board",
+                  onClick: handleDeleteBoard,
+                  className: "text-destructive2",
+                },
+              ]}
+            />
           </div>
         </div>
       </div>

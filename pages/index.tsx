@@ -12,7 +12,8 @@ import CreateBoard from "@/components/CreateBoard";
 import Delete from "@/components/Delete";
 import EditBoard from "@/components/EditBoard";
 import CreateTask from "@/components/CreateTask";
-
+import Task from "@/model/Task";
+import ViewTask from "@/components/ViewTask";
 interface HomeProps {
   data: { boards: Board[] };
 }
@@ -21,7 +22,12 @@ const Home: React.FC<HomeProps> = ({ data }) => {
   const [newBoardModalIsOpen, setNewBoardModalIsOpen] = useState(false);
   const [editBoardModalIsOpen, setEditBoardModalIsOpen] = useState(false);
   const [deleteBoardModalIsOpen, setDeleteBoardModalIsOpen] = useState(false);
+  const [deleteTaskModalIsOpen, setDeleteTaskModalIsOpen] = useState(false);
   const [newTaskModalIsOpen, setNewTaskModalIsOpen] = useState(false);
+  const [openedTask, setOpenedTask] = useState<{
+    taskIndex: number;
+    colIndex: number;
+  }>();
   const [boards, setBoards] = useState(data.boards);
 
   const handleAddNewBoard = () => {
@@ -55,7 +61,86 @@ const Home: React.FC<HomeProps> = ({ data }) => {
     setBoards(updatedBoards);
     setActiveBoard(0);
   };
-  const handleAddNewTask = () => {};
+
+  const handleAddNewTask = (task: Task) => {
+    const status = task.status;
+    const updatedBoards = [...boards];
+    const columnIndex = updatedBoards[activeBoard].columns.findIndex(
+      (el) => el.name === status
+    );
+
+    if (columnIndex > -1) {
+      updatedBoards[activeBoard].columns[columnIndex].tasks.push(task);
+      setBoards(updatedBoards);
+    }
+    setNewTaskModalIsOpen(false);
+  };
+
+  const handleClickedTask = (colIndex: number, taskIndex: number) => {
+    setOpenedTask({ taskIndex, colIndex });
+  };
+
+  const handleChangeTask = (task: Task) => {
+    if (openedTask) {
+      const updatedBoards = [...boards];
+      updatedBoards[activeBoard].columns[openedTask.colIndex].tasks[
+        openedTask.taskIndex
+      ] = task;
+      setBoards(updatedBoards);
+    }
+  };
+
+  const handleChangeTaskStatus = (status: string) => {
+    if (openedTask) {
+      const updatedBoards = [...boards];
+      //first of all get a copy of the task.
+      const updatedTask =
+        updatedBoards[activeBoard].columns[openedTask.colIndex].tasks[
+          openedTask.taskIndex
+        ];
+      updatedTask.status = status;
+
+      //delete task from current column
+      updatedBoards[activeBoard].columns[openedTask.colIndex].tasks.splice(
+        openedTask.taskIndex,
+        1
+      );
+
+      //add the task to target column. firts find it's index
+      const targetColIndex = updatedBoards[activeBoard].columns.findIndex(
+        (el) => el.name === status
+      );
+
+      if (targetColIndex > -1) {
+        updatedBoards[activeBoard].columns[targetColIndex].tasks.push(
+          updatedTask
+        );
+      }
+
+      //update indexes(task and column) of current opened task;
+      setOpenedTask({
+        taskIndex:
+          updatedBoards[activeBoard].columns[targetColIndex].tasks.length - 1,
+        colIndex: targetColIndex,
+      });
+
+      //finally update global state of boards
+      setBoards(updatedBoards);
+    }
+  };
+  const handleDeleteTask = () => {
+    const updatedBoards = [...boards];
+    if (openedTask) {
+      updatedBoards[activeBoard]?.columns[openedTask.colIndex]?.tasks?.splice(
+        openedTask.taskIndex,
+        1
+      );
+
+      setBoards(updatedBoards);
+    }
+    setOpenedTask(undefined);
+    setDeleteTaskModalIsOpen(false);
+  };
   useEffect(() => {
     const html = document.querySelector("html");
     html?.classList.add(localStorage.getItem("theme") || "light");
@@ -82,6 +167,7 @@ const Home: React.FC<HomeProps> = ({ data }) => {
           <Tasks
             board={boards[activeBoard]}
             onCreateColumn={() => setEditBoardModalIsOpen(true)}
+            onClickedTask={handleClickedTask}
           />
         </div>
 
@@ -104,8 +190,7 @@ const Home: React.FC<HomeProps> = ({ data }) => {
           <Modal onClickBackdrop={() => setDeleteBoardModalIsOpen(false)}>
             <Delete
               title="Delete this board?"
-              description="
-            Are you sure you want to delete ...."
+              description={`Are you sure you want to delete the ‘${boards[activeBoard].name}’ board? This action will remove all columns and tasks and cannot be reversed.`}
               onCancel={() => setDeleteBoardModalIsOpen(false)}
               onConfirm={handleConfirmDeleteBoard}
             />
@@ -114,7 +199,46 @@ const Home: React.FC<HomeProps> = ({ data }) => {
 
         {newTaskModalIsOpen && (
           <Modal onClickBackdrop={() => setNewTaskModalIsOpen(false)}>
-            <CreateTask />
+            <CreateTask
+              columns={boards[activeBoard].columns.map((col) => {
+                return { label: col.name, value: col.name };
+              })}
+              onCreateTask={handleAddNewTask}
+            />
+          </Modal>
+        )}
+        {openedTask && !deleteTaskModalIsOpen && (
+          <Modal onClickBackdrop={() => setOpenedTask(undefined)}>
+            <ViewTask
+              task={
+                boards[activeBoard].columns[openedTask.colIndex].tasks[
+                  openedTask.taskIndex
+                ]
+              }
+              columns={boards[activeBoard].columns.map((col) => {
+                return { label: col.name, value: col.name };
+              })}
+              onChangeTask={handleChangeTask}
+              handleChangeTaskStatus={handleChangeTaskStatus}
+              onDeleteTask={() => setDeleteTaskModalIsOpen(true)}
+            />
+          </Modal>
+        )}
+        {openedTask && deleteTaskModalIsOpen && (
+          <Modal onClickBackdrop={() => setOpenedTask(undefined)}>
+            <Delete
+              title="Delete this task?"
+              description={`Are you sure you want to delete the ‘${
+                boards[activeBoard].columns[openedTask.colIndex].tasks[
+                  openedTask.taskIndex
+                ].title
+              }’ task and its subtasks? This action cannot be reversed.`}
+              onCancel={() => {
+                setDeleteTaskModalIsOpen(false);
+                setOpenedTask(undefined);
+              }}
+              onConfirm={handleDeleteTask}
+            />
           </Modal>
         )}
       </div>

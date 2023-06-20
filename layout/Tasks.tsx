@@ -5,13 +5,22 @@ import Board from "@/model/Board";
 interface TasksProps {
   board: Board;
   onCreateColumn: () => void;
+  onClickedTask: (colIndex: number, taskIndex: number) => void;
 }
 
-const Tasks: React.FC<TasksProps> = ({ board, onCreateColumn }) => {
+const Tasks: React.FC<TasksProps> = ({
+  board,
+  onCreateColumn,
+  onClickedTask,
+}) => {
   return (
     <div className="flex-1 h-full  p-6 flex gap-6 overflow-auto flex-nowrap bg-white2 dark:bg-black3 border-t border-t-gray1 dark:border-t-black1">
       {board?.columns.map((col, index) => (
-        <TaskColumn col={col} key={index} />
+        <TaskColumn
+          col={col}
+          key={index}
+          onClickedTask={(taskIndex: number) => onClickedTask(index, taskIndex)}
+        />
       ))}
       {board && board.columns.length > 0 && (
         <div className="bg-gray1 dark:bg-black2 text-center mt-10 flex rounded-md">

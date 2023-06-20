@@ -7,8 +7,9 @@ import React, {
 
 interface TextInputProps {
   label?: string;
-  name: string;
+  name?: string;
   placeholder?: string;
+  id?: string;
   value: string;
   onChange: (e: React.FormEvent<HTMLInputElement>) => void;
 }
@@ -18,7 +19,7 @@ interface ImperativeInput {
 }
 
 const TextInput = forwardRef<ImperativeInput, TextInputProps>(
-  ({ label, name, placeholder, value, onChange }, ref) => {
+  ({ label, id, name, placeholder, value, onChange }, ref) => {
     const [error, setError] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
     useImperativeHandle(ref, () => ({
@@ -31,7 +32,7 @@ const TextInput = forwardRef<ImperativeInput, TextInputProps>(
       <div className="w-full">
         {label && (
           <label
-            htmlFor={name}
+            htmlFor={id}
             className="block mb-2 text-gray3 text-sm font-bold"
           >
             {label}
@@ -41,10 +42,13 @@ const TextInput = forwardRef<ImperativeInput, TextInputProps>(
           <input
             type="text"
             name={name}
+            id={id}
             value={value}
             ref={inputRef}
-            className={`w-full border text-base  focus:border-primary2 py-2 px-4 rounded-md outline-none dark:bg-black2  dark:placeholder:text-gray3 placeholder:opacity-25 focus:ring-0 ${
-              error ? "  border-destructive2" : "border-black1 "
+            className={`w-full border text-base  focus:border-primary2 py-2 px-4 rounded-md outline-none dark:bg-black2  dark:placeholder:text-white placeholder:text-black placeholder:opacity-25 focus:ring-0 ${
+              error
+                ? "  border-destructive2"
+                : "dark:border-black1 border-black border-opacity-25"
             }`}
             placeholder={placeholder}
             onChange={onChange}
