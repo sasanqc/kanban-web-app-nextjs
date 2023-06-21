@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
 import Button from "../components/UI/Button";
 import VerticalElipsisIcon from "@/icons/icon-vertical-ellipsis.svg";
 import LogoDarkIcon from "@/icons/logo-dark.svg";
@@ -7,18 +7,10 @@ import LogoMobileIcon from "@/icons/logo-mobile.svg";
 import ChevronDownIcon from "@/icons/icon-chevron-down.svg";
 import AddIcon from "@/icons/icon-add-task-mobile.svg";
 import Dropdown from "@/components/UI/Dropdown";
-
-interface HeaderProps {
-  handleEditBoard: () => void;
-  handleDeleteBoard: () => void;
-  handleAddNewTask: () => void;
-}
-
-const Header: React.FC<HeaderProps> = ({
-  handleEditBoard,
-  handleDeleteBoard,
-  handleAddNewTask,
-}) => {
+import { setActiveModal } from "@/store/uiSlice";
+import ModalEnum from "@/model/ModalEnum";
+const Header = () => {
+  const dipsatch = useDispatch();
   return (
     <div className="flex  items-center justify-between  ">
       {/* Desktop Header */}
@@ -33,18 +25,19 @@ const Header: React.FC<HeaderProps> = ({
             <Button
               label="+ Add New Task"
               type="primary large"
-              onClick={handleAddNewTask}
+              onClick={() => dipsatch(setActiveModal(ModalEnum.CREATE_TASK))}
             />
             <Dropdown
               items={[
                 {
                   label: "Edit Board",
-                  onClick: handleEditBoard,
+                  onClick: () => dipsatch(setActiveModal(ModalEnum.EDIT_BOARD)),
                   className: "text-gray3",
                 },
                 {
                   label: "Delete Board",
-                  onClick: handleDeleteBoard,
+                  onClick: () =>
+                    dipsatch(setActiveModal(ModalEnum.DELETE_BOARD)),
                   className: "text-destructive2",
                 },
               ]}

@@ -1,12 +1,13 @@
 import React from "react";
+import { useSelector, useDispatch } from "react-redux";
 import BoardIcon from "@/icons/icon-board.svg";
 import BoardListProps from "@/model/BoardListProps";
-const BoardsList: React.FC<BoardListProps> = ({
-  boards,
-  activeBoard = 0,
-  onChangedaActiveBoard,
-  onAddNewBoard,
-}) => {
+
+import { selectBoard, setActiveBoard, setActiveModal } from "@/store/uiSlice";
+import ModalEnum from "@/model/ModalEnum";
+const BoardsList: React.FC<BoardListProps> = ({ boards }) => {
+  const activeBoard = useSelector(selectBoard);
+  const dispatch = useDispatch();
   return (
     <div>
       <h4 className="text-gray3 pl-8 mb-5 mt-4">
@@ -19,7 +20,7 @@ const BoardsList: React.FC<BoardListProps> = ({
             className={`flex pl-8 py-4 gap-x-4 mr-6 items-center   rounded-r-full cursor-pointer  ${
               activeBoard === i ? "bg-primary2 text-white" : "text-gray3"
             }`}
-            onClick={() => onChangedaActiveBoard(i)}
+            onClick={() => dispatch(setActiveBoard(i))}
           >
             <span>
               <BoardIcon />
@@ -30,7 +31,7 @@ const BoardsList: React.FC<BoardListProps> = ({
 
         <li
           className=" flex pl-8 py-4 gap-x-4 mr-6 items-center text-primary2  rounded-r-full cursor-pointer"
-          onClick={onAddNewBoard}
+          onClick={() => dispatch(setActiveModal(ModalEnum.CREATE_BOARD))}
         >
           <span>
             <BoardIcon />

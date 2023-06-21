@@ -27,7 +27,7 @@ const TextInput = forwardRef<ImperativeInput, TextInputProps>(
         setError(message);
       },
     }));
-    console.log("render: ", error);
+
     return (
       <div className="w-full">
         {label && (

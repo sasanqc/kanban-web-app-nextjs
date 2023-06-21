@@ -1,11 +1,11 @@
 import { useEffect } from "react";
-import Button from "@/components/UI/Button";
-import Checkbox from "@/components/UI/Checkbox";
+import { useSelector, useDispatch } from "react-redux";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import Header from "@/layout/Header";
 import Sidebar from "@/layout/Sidebar";
 import Tasks from "@/layout/Tasks";
-import data from "@/data/data.json";
-import { useState } from "react";
+
 import Board from "@/model/Board";
 import Modal from "@/components/UI/Modal";
 import CreateBoard from "@/components/CreateBoard";
@@ -14,52 +14,84 @@ import EditBoard from "@/components/EditBoard";
 import CreateTask from "@/components/CreateTask";
 import Task from "@/model/Task";
 import ViewTask from "@/components/ViewTask";
-interface HomeProps {
-  data: { boards: Board[] };
-}
-const Home: React.FC<HomeProps> = ({ data }) => {
-  const [activeBoard, setActiveBoard] = useState(0);
-  const [newBoardModalIsOpen, setNewBoardModalIsOpen] = useState(false);
-  const [editBoardModalIsOpen, setEditBoardModalIsOpen] = useState(false);
-  const [deleteBoardModalIsOpen, setDeleteBoardModalIsOpen] = useState(false);
-  const [deleteTaskModalIsOpen, setDeleteTaskModalIsOpen] = useState(false);
-  const [newTaskModalIsOpen, setNewTaskModalIsOpen] = useState(false);
-  const [openedTask, setOpenedTask] = useState<{
-    taskIndex: number;
-    colIndex: number;
-  }>();
-  const [boards, setBoards] = useState(data.boards);
+import {
+  selectBoard,
+  selectModal,
+  selectTask,
+  setActiveBoard,
+  setActiveModal,
+  setOpenedTask,
+} from "@/store/uiSlice";
 
-  const handleAddNewBoard = () => {
-    setNewBoardModalIsOpen(true);
-  };
+import ModalEnum from "@/model/ModalEnum";
+import {
+  createBoard,
+  deleteBoard,
+  editBoard,
+  getBoards,
+} from "@/services/apiBoards";
+
+import { getData } from "@/utils/boards-fs";
+interface HomeProps {
+  prefetchedData: { boards: Board[] };
+}
+const Home: React.FC<HomeProps> = ({ prefetchedData }) => {
+  const activeBoard = useSelector(selectBoard);
+  const activeModal = useSelector(selectModal);
+  const openedTask = useSelector(selectTask);
+
+  const dispatch = useDispatch();
+
+  const {
+    isLoading,
+    data: { boards },
+    error,
+  } = useQuery({
+    queryKey: ["boards"],
+    queryFn: getBoards,
+    initialData: prefetchedData,
+  });
 
   const handleCreateBoard = (board: Board) => {
-    setBoards([...boards, board]);
-    setActiveBoard(boards.length);
-    setNewBoardModalIsOpen(false);
+    create(board);
   };
 
-  const handleChangeActiveBoard = (active: number) => {
-    setActiveBoard(active);
-  };
+  const { mutate: create } = useMutation({
+    mutationFn: createBoard,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["boards"] }).then(() => {
+        dispatch(setActiveBoard(boards.length));
+      });
+      dispatch(setActiveModal(undefined));
+    },
+  });
 
   const handleSaveEditBoard = (board: Board) => {
-    const updatedBoards = [...boards];
-    const boardIndex = updatedBoards.findIndex((el) => el.name === board.name);
-    if (boardIndex > -1) {
-      updatedBoards[boardIndex] = board;
-    }
-    setBoards(updatedBoards);
-    setEditBoardModalIsOpen(false);
+    update({ id: activeBoard.toString(), board });
   };
 
+  const queryClient = useQueryClient();
+
+  const { isLoading: loading, mutate } = useMutation({
+    mutationFn: (id: string) => deleteBoard(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["boards"] });
+      dispatch(setActiveModal(undefined));
+      dispatch(setActiveBoard(0));
+    },
+  });
+
+  const { mutate: update } = useMutation({
+    mutationFn: ({ id, board }: { id: string; board: Board }) =>
+      editBoard(id, board),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["boards"] });
+      dispatch(setActiveModal(undefined));
+    },
+  });
+
   const handleConfirmDeleteBoard = () => {
-    setDeleteBoardModalIsOpen(false);
-    const updatedBoards = [...boards];
-    updatedBoards.splice(activeBoard, 1);
-    setBoards(updatedBoards);
-    setActiveBoard(0);
+    mutate(activeBoard.toString());
   };
 
   const handleAddNewTask = (task: Task) => {
@@ -71,13 +103,14 @@ const Home: React.FC<HomeProps> = ({ data }) => {
 
     if (columnIndex > -1) {
       updatedBoards[activeBoard].columns[columnIndex].tasks.push(task);
-      setBoards(updatedBoards);
+      //setBoards(updatedBoards);
     }
-    setNewTaskModalIsOpen(false);
+    //setNewTaskModalIsOpen(false);
   };
 
   const handleClickedTask = (colIndex: number, taskIndex: number) => {
-    setOpenedTask({ taskIndex, colIndex });
+    //setOpenedTask({ taskIndex, colIndex });
+    dispatch(setOpenedTask({ taskIndex, colIndex }));
   };
 
   const handleChangeTask = (task: Task) => {
@@ -86,7 +119,7 @@ const Home: React.FC<HomeProps> = ({ data }) => {
       updatedBoards[activeBoard].columns[openedTask.colIndex].tasks[
         openedTask.taskIndex
       ] = task;
-      setBoards(updatedBoards);
+      //setBoards(updatedBoards);
     }
   };
 
@@ -106,7 +139,7 @@ const Home: React.FC<HomeProps> = ({ data }) => {
         1
       );
 
-      //add the task to target column. firts find it's index
+      //add the task to target column. first find it's index
       const targetColIndex = updatedBoards[activeBoard].columns.findIndex(
         (el) => el.name === status
       );
@@ -125,7 +158,7 @@ const Home: React.FC<HomeProps> = ({ data }) => {
       });
 
       //finally update global state of boards
-      setBoards(updatedBoards);
+      //setBoards(updatedBoards);
     }
   };
   const handleDeleteTask = () => {
@@ -136,10 +169,10 @@ const Home: React.FC<HomeProps> = ({ data }) => {
         1
       );
 
-      setBoards(updatedBoards);
+      //setBoards(updatedBoards);
     }
     setOpenedTask(undefined);
-    setDeleteTaskModalIsOpen(false);
+    //setDeleteTaskModalIsOpen(false);
   };
   useEffect(() => {
     const html = document.querySelector("html");
@@ -150,35 +183,30 @@ const Home: React.FC<HomeProps> = ({ data }) => {
   return (
     <main className="text-black dark:text-white bg-white dark:bg-black2 w-screen h-screen flex">
       <div className="flex flex-col overflow-hidden flex-1">
-        <Header
-          handleDeleteBoard={() => setDeleteBoardModalIsOpen(true)}
-          handleEditBoard={() => setEditBoardModalIsOpen(true)}
-          handleAddNewTask={() => setNewTaskModalIsOpen(true)}
-        />
+        <Header />
         <div className="flex-1 flex overflow-auto w-full">
           <Sidebar
             boards={boards.map((item: Board) => {
               return { name: item.name };
             })}
-            onAddNewBoard={handleAddNewBoard}
-            onChangedaActiveBoard={handleChangeActiveBoard}
-            activeBoard={activeBoard}
           />
           <Tasks
             board={boards[activeBoard]}
-            onCreateColumn={() => setEditBoardModalIsOpen(true)}
+            onCreateColumn={() =>
+              dispatch(setActiveModal(ModalEnum.EDIT_BOARD))
+            }
             onClickedTask={handleClickedTask}
           />
         </div>
 
-        {newBoardModalIsOpen && (
-          <Modal onClickBackdrop={() => setNewBoardModalIsOpen(false)}>
+        {activeModal === ModalEnum.CREATE_BOARD && (
+          <Modal onClickBackdrop={() => dispatch(setActiveModal(undefined))}>
             <CreateBoard onCreateBoard={handleCreateBoard} />
           </Modal>
         )}
 
-        {editBoardModalIsOpen && (
-          <Modal onClickBackdrop={() => setEditBoardModalIsOpen(false)}>
+        {activeModal === ModalEnum.EDIT_BOARD && (
+          <Modal onClickBackdrop={() => dispatch(setActiveModal(undefined))}>
             <EditBoard
               board={boards?.[activeBoard]}
               onEditBoard={handleSaveEditBoard}
@@ -186,19 +214,23 @@ const Home: React.FC<HomeProps> = ({ data }) => {
           </Modal>
         )}
 
-        {deleteBoardModalIsOpen && (
-          <Modal onClickBackdrop={() => setDeleteBoardModalIsOpen(false)}>
+        {activeModal === ModalEnum.DELETE_BOARD && (
+          <Modal onClickBackdrop={() => dispatch(setActiveModal(undefined))}>
             <Delete
               title="Delete this board?"
               description={`Are you sure you want to delete the ‘${boards[activeBoard].name}’ board? This action will remove all columns and tasks and cannot be reversed.`}
-              onCancel={() => setDeleteBoardModalIsOpen(false)}
+              onCancel={() => dispatch(setActiveModal(undefined))}
               onConfirm={handleConfirmDeleteBoard}
             />
           </Modal>
         )}
 
-        {newTaskModalIsOpen && (
-          <Modal onClickBackdrop={() => setNewTaskModalIsOpen(false)}>
+        {activeModal === ModalEnum.CREATE_TASK && (
+          <Modal
+            onClickBackdrop={() => {
+              dispatch(setActiveModal(undefined));
+            }}
+          >
             <CreateTask
               columns={boards[activeBoard].columns.map((col) => {
                 return { label: col.name, value: col.name };
@@ -207,8 +239,14 @@ const Home: React.FC<HomeProps> = ({ data }) => {
             />
           </Modal>
         )}
-        {openedTask && !deleteTaskModalIsOpen && (
-          <Modal onClickBackdrop={() => setOpenedTask(undefined)}>
+
+        {openedTask && !(activeModal === ModalEnum.DELETE_TASK) && (
+          <Modal
+            onClickBackdrop={() => {
+              dispatch(setActiveModal(undefined));
+              dispatch(setOpenedTask(undefined));
+            }}
+          >
             <ViewTask
               task={
                 boards[activeBoard].columns[openedTask.colIndex].tasks[
@@ -220,12 +258,14 @@ const Home: React.FC<HomeProps> = ({ data }) => {
               })}
               onChangeTask={handleChangeTask}
               handleChangeTaskStatus={handleChangeTaskStatus}
-              onDeleteTask={() => setDeleteTaskModalIsOpen(true)}
+              onDeleteTask={() =>
+                dispatch(setActiveModal(ModalEnum.DELETE_TASK))
+              }
             />
           </Modal>
         )}
-        {openedTask && deleteTaskModalIsOpen && (
-          <Modal onClickBackdrop={() => setOpenedTask(undefined)}>
+        {openedTask && activeModal === ModalEnum.DELETE_TASK && (
+          <Modal onClickBackdrop={() => dispatch(setOpenedTask(undefined))}>
             <Delete
               title="Delete this task?"
               description={`Are you sure you want to delete the ‘${
@@ -234,8 +274,8 @@ const Home: React.FC<HomeProps> = ({ data }) => {
                 ].title
               }’ task and its subtasks? This action cannot be reversed.`}
               onCancel={() => {
-                setDeleteTaskModalIsOpen(false);
-                setOpenedTask(undefined);
+                dispatch(setActiveModal(undefined));
+                dispatch(setOpenedTask(undefined));
               }}
               onConfirm={handleDeleteTask}
             />
@@ -248,5 +288,6 @@ const Home: React.FC<HomeProps> = ({ data }) => {
 
 export default Home;
 export async function getStaticProps() {
-  return { props: { data } };
+  const prefetchedData = getData();
+  return { props: { prefetchedData } };
 }

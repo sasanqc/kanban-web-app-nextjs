@@ -1,0 +1,9 @@
+enum ModalEnum {
+  EDIT_TASK = "EDIT_TASK",
+  CREATE_TASK = "CREATE_TASK",
+  EDIT_BOARD = "EDIT_BOARD",
+  CREATE_BOARD = "CREATE_BOARD",
+  DELETE_BOARD = "DELETE_BOARD",
+  DELETE_TASK = "DELETE_TASK",
+}
+export default ModalEnum;

@@ -14,7 +14,6 @@ const Modal: React.FC<ModalProps> = ({
 
   const backDropHandler = useCallback((e: MouseEvent) => {
     if (!modalRef?.current?.contains(e.target as Node)) {
-      console.log("on click on backdrop");
       onClickBackdrop();
     }
   }, []);
