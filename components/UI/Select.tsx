@@ -22,7 +22,7 @@ const Select: React.FC<SelectProps> = ({
     setIsOpen(true);
   };
 
-  const handleSelectedItem = (e: MouseEvent) => {
+  const handleSelectedItem = (e: React.MouseEvent<HTMLUListElement>) => {
     e.stopPropagation();
     const value = (e.target as HTMLElement).getAttribute("data-value");
 

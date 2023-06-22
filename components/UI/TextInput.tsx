@@ -64,4 +64,5 @@ const TextInput = forwardRef<ImperativeInput, TextInputProps>(
     );
   }
 );
+TextInput.displayName = "TextInput";
 export default TextInput;

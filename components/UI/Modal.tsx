@@ -12,11 +12,14 @@ const Modal: React.FC<ModalProps> = ({
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
-  const backDropHandler = useCallback((e: MouseEvent) => {
-    if (!modalRef?.current?.contains(e.target as Node)) {
-      onClickBackdrop();
-    }
-  }, []);
+  const backDropHandler = useCallback(
+    (e: MouseEvent) => {
+      if (!modalRef?.current?.contains(e.target as Node)) {
+        onClickBackdrop();
+      }
+    },
+    [onClickBackdrop]
+  );
 
   useEffect(() => {
     setTimeout(() => {
@@ -25,7 +28,8 @@ const Modal: React.FC<ModalProps> = ({
     return () => {
       window.removeEventListener("click", backDropHandler);
     };
-  }, []);
+  }, [backDropHandler]);
+
   return (
     <div className=" w-screen h-screen absolute top-0 left-0 z-10 bg-[#00000080]">
       <div
