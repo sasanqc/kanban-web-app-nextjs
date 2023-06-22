@@ -22,12 +22,15 @@ const Dropdown: React.FC<DropdownProps> = ({ items }) => {
   }, []);
   return (
     <div className="relative z-30" ref={menuRef}>
-      <VerticalElipsisIcon
-        className="cursor-pointer"
+      <div
+        className="cursor-pointer p-2 hover:bg-black1 rounded-md transition"
         onClick={() => setMenuIsOpen(true)}
-      />
+      >
+        <VerticalElipsisIcon />
+      </div>
+
       {menuIsOpoen && (
-        <ul className="absolute text-base font-semibold bg-white dark:bg-black3 right-0 mt-8 w-48 p-4 rounded-md space-y-4">
+        <ul className="absolute text-base font-semibold bg-white dark:bg-black1 right-0 mt-4 w-48 p-4 rounded-md space-y-4">
           {items.map((el, index) => {
             return (
               <li

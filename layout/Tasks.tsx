@@ -1,31 +1,38 @@
 import TaskColumn from "@/components/TaskColumn";
 import Button from "@/components/UI/Button";
+import { useBoard } from "@/hooks/useBoard";
 import Board from "@/model/Board";
+import ModalEnum from "@/model/ModalEnum";
+import Task from "@/model/Task";
+import { selectBoard, setActiveModal, setOpenedTask } from "@/store/uiSlice";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
-interface TasksProps {
-  board: Board;
-  onCreateColumn: () => void;
-  onClickedTask: (colIndex: number, taskIndex: number) => void;
-}
+const Tasks: React.FC<{ board: Board }> = () => {
+  const dispatch = useDispatch();
+  const activeBoard = useSelector(selectBoard);
+  const board = useBoard({ boards: [] })?.[activeBoard];
+  const onClickedTask = (colIndex: number, taskIndex: number) => {
+    dispatch(setOpenedTask({ taskIndex, colIndex }));
+  };
 
-const Tasks: React.FC<TasksProps> = ({
-  board,
-  onCreateColumn,
-  onClickedTask,
-}) => {
   return (
     <div className="flex-1 h-full  p-6 flex gap-6 overflow-auto flex-nowrap bg-white2 dark:bg-black3 border-t border-t-gray1 dark:border-t-black1">
-      {board?.columns?.map((col, index) => (
-        <TaskColumn
-          col={col}
-          key={index}
-          onClickedTask={(taskIndex: number) => onClickedTask(index, taskIndex)}
-        />
-      ))}
+      {board?.columns?.map(
+        (col: { name: string; tasks: Task[] }, index: number) => (
+          <TaskColumn
+            col={col}
+            key={index}
+            onClickedTask={(taskIndex: number) =>
+              onClickedTask(index, taskIndex)
+            }
+          />
+        )
+      )}
       {board?.columns?.length > 0 && (
         <div className="bg-gray1 dark:bg-black2 text-center mt-10 flex rounded-md">
           <h1
-            onClick={onCreateColumn}
+            onClick={() => dispatch(setActiveModal(ModalEnum.EDIT_BOARD))}
             className="text-gray3 w-[280px] my-auto cursor-pointer hover:text-gray1 transition-colors"
           >
             + New Column
@@ -41,7 +48,7 @@ const Tasks: React.FC<TasksProps> = ({
             <Button
               label="+ Add New Column"
               type="primary large"
-              onClick={onCreateColumn}
+              onClick={() => dispatch(setActiveModal(ModalEnum.EDIT_BOARD))}
             />
           </div>
         ))}

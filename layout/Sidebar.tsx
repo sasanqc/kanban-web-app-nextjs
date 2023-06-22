@@ -1,9 +1,11 @@
 import BoardsList from "@/components/BoardsList";
 import ToggleTheme from "@/components/ToggleTheme";
+import { useBoard } from "@/hooks/useBoard";
 import HideIcon from "@/icons/icon-hide.svg";
-import BoardListProps from "@/model/BoardListProps";
 
-const Sidebar: React.FC<BoardListProps> = ({ boards }) => {
+const Sidebar = () => {
+  const boards = useBoard({ boards: [] });
+  console.log("render sidebar");
   return (
     <div className="w-[260px] md:w-[300px] border-r border-r-gray1  dark:border-r-black1 relative  hidden sm:inline-block">
       <BoardsList boards={boards} />

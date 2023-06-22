@@ -8,6 +8,7 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ col, onClickedTask }) => {
   const doneSubtasksNumber = (task: Task) => {
     return task.subtasks.filter((el) => el.isCompleted).length;
   };
+
   return (
     <div className="w-[280px] shrink-0 h-full">
       <div className="flex mb-6">

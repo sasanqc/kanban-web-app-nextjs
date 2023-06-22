@@ -1,12 +1,13 @@
 import Board from "@/model/Board";
+const BASE_URL = "api/boards";
 export const getBoards = async () => {
-  const response = await fetch("http://localhost:3000/api/boards");
+  const response = await fetch(BASE_URL);
   const data = response.json();
   return data;
 };
 
-export const createBoard = async (board: Board) => {
-  const response = await fetch("http://localhost:3000/api/boards", {
+export const createBoardApi = async (board: Board) => {
+  const response = await fetch(BASE_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -17,8 +18,8 @@ export const createBoard = async (board: Board) => {
   return data;
 };
 
-export const editBoard = async (id: string, board: Board) => {
-  const response = await fetch(`http://localhost:3000/api/boards/${id}`, {
+export const updateBoardApi = async (id: string, board: Board) => {
+  const response = await fetch(`${BASE_URL}/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -29,8 +30,8 @@ export const editBoard = async (id: string, board: Board) => {
   return data;
 };
 
-export const deleteBoard = async (id: string) => {
-  const response = await fetch(`http://localhost:3000/api/boards/${id}`, {
+export const deleteBoardApi = async (id: string) => {
+  const response = await fetch(`${BASE_URL}/${id}`, {
     method: "DELETE",
   });
   const data = await response.json();
