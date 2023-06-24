@@ -13,6 +13,7 @@ const Tasks: React.FC<{ board: Board }> = () => {
   const activeBoard = useSelector(selectBoard);
   const board = useBoard({ boards: [] })?.[activeBoard];
   const onClickedTask = (colIndex: number, taskIndex: number) => {
+    dispatch(setActiveModal(ModalEnum.VIEW_TASK));
     dispatch(setOpenedTask({ taskIndex, colIndex }));
   };
 
@@ -39,19 +40,18 @@ const Tasks: React.FC<{ board: Board }> = () => {
           </h1>
         </div>
       )}
-      {board?.columns?.length === 0 ||
-        (!board.columns && (
-          <div className="text-center relative my-auto w-full">
-            <h2 className="text-2xl text-gray3 mb-8 font-bold">
-              This board is empty. Create a new column to get started.
-            </h2>
-            <Button
-              label="+ Add New Column"
-              type="primary large"
-              onClick={() => dispatch(setActiveModal(ModalEnum.EDIT_BOARD))}
-            />
-          </div>
-        ))}
+      {board?.columns?.length === 0 && (
+        <div className="text-center relative my-auto w-full">
+          <h2 className="text-2xl text-gray3 mb-8 font-bold">
+            This board is empty. Create a new column to get started.
+          </h2>
+          <Button
+            label="+ Add New Column"
+            type="primary large"
+            onClick={() => dispatch(setActiveModal(ModalEnum.EDIT_BOARD))}
+          />
+        </div>
+      )}
     </div>
   );
 };

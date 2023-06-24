@@ -12,14 +12,12 @@ const Modal: React.FC<ModalProps> = ({
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
-  const backDropHandler = useCallback(
-    (e: MouseEvent) => {
-      if (!modalRef?.current?.contains(e.target as Node)) {
-        onClickBackdrop();
-      }
-    },
-    [onClickBackdrop]
-  );
+  const backDropHandler = useCallback((e: MouseEvent) => {
+    if (!modalRef?.current?.contains(e.target as Node)) {
+      console.log("on Clicked Backdrop");
+      onClickBackdrop();
+    }
+  }, []);
 
   useEffect(() => {
     setTimeout(() => {

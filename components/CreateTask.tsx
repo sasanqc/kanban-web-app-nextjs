@@ -4,6 +4,7 @@ import CrossIcon from "@/icons/icon-cross.svg";
 import Select from "./UI/Select";
 import TextInput from "./UI/TextInput";
 import Task from "@/model/Task";
+
 interface CreateTaskProps {
   task?: Task;
   columns: { label: string; value: string }[];
@@ -17,14 +18,19 @@ const CreateTask: React.FC<CreateTaskProps> = ({
   columns,
   onCreateTask,
 }) => {
-  const [subtasks, setSubtasks] = useState(
-    task?.subtasks ? task.subtasks.map((el) => el.title) : ["", ""]
-  );
+  const initialSubTasks = [
+    { title: "", isCompleted: false },
+    { title: "", isCompleted: false },
+  ];
+  const [subtasks, setSubtasks] = useState(task?.subtasks || initialSubTasks);
   const [title, setTitle] = useState(task?.title || "");
-  const [description, setDescription] = useState("");
-  const [status, setStatus] = useState(columns[0].value);
-  const inputRef = useRef<ImperativeInput>(null);
 
+  const [description, setDescription] = useState(task?.description || "");
+  const [status, setStatus] = useState(
+    columns.find((el) => el.value === task?.status)?.value || columns[0].value
+  );
+  const inputRef = useRef<ImperativeInput>(null);
+  const columnsRef = useRef<Array<ImperativeInput | null>>([]);
   const onChangedTitle = (e: React.FormEvent<HTMLInputElement>) => {
     setTitle((e.target as HTMLInputElement).value);
   };
@@ -33,7 +39,7 @@ const CreateTask: React.FC<CreateTaskProps> = ({
     index: number
   ) => {
     const updatedColumns = [...subtasks];
-    updatedColumns[index] = (e.target as HTMLInputElement).value;
+    updatedColumns[index].title = (e.target as HTMLInputElement).value;
     setSubtasks(updatedColumns);
   };
 
@@ -49,22 +55,27 @@ const CreateTask: React.FC<CreateTaskProps> = ({
       inputRef.current?.error("Can't be empty");
       return;
     }
-
+    //validate subtasks title
+    for (let i = 0; i < subtasks.length; i++) {
+      const element = subtasks[i];
+      if (element.title.length === 0) {
+        columnsRef.current[i]?.error("Can't be empty");
+        return;
+      }
+    }
     onCreateTask({
       title,
       description,
       status,
-      subtasks: subtasks
-        .filter((el) => el.length > 0)
-        .map((el) => {
-          return { title: el, isCompleted: false };
-        }),
+      subtasks,
     });
   };
 
   return (
     <div className="modal-content">
-      <h2 className="text-black4 mb-6 dark:text-white">Add New Task</h2>
+      <h2 className="text-black4 mb-6 dark:text-white">
+        {task ? "Edit Task" : "Add New Task"}
+      </h2>
       <div className="space-y-6">
         <TextInput
           label={"Title"}
@@ -107,7 +118,8 @@ const CreateTask: React.FC<CreateTaskProps> = ({
                     onChange={(e: React.FormEvent<HTMLInputElement>) =>
                       handleChangedSubtask(e, index)
                     }
-                    value={subtasks[index]}
+                    ref={(el) => (columnsRef.current[index] = el)}
+                    value={subtasks[index].title}
                   />
                   <div className="ml-4 cursor-pointer">
                     <CrossIcon
@@ -121,7 +133,12 @@ const CreateTask: React.FC<CreateTaskProps> = ({
               type={"small secondary"}
               classes="w-full"
               label="+ Add New Subtask"
-              onClick={() => setSubtasks((prev) => [...prev, ""])}
+              onClick={() =>
+                setSubtasks((prev) => [
+                  ...prev,
+                  { title: "", isCompleted: false },
+                ])
+              }
             />
           </div>
 
@@ -129,10 +146,11 @@ const CreateTask: React.FC<CreateTaskProps> = ({
             label={"Status"}
             items={columns}
             onChanged={(value) => setStatus(value)}
+            initialItem={columns.findIndex((el) => el.value === status)}
           />
 
           <Button
-            label="Create Task"
+            label={task ? "Edit Task" : "Create Task"}
             onClick={handleSubmitTask}
             classes={"w-full"}
             type={"primary small"}

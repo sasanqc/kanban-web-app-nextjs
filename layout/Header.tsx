@@ -1,4 +1,4 @@
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Button from "../components/UI/Button";
 import VerticalElipsisIcon from "@/icons/icon-vertical-ellipsis.svg";
 import LogoDarkIcon from "@/icons/logo-dark.svg";
@@ -7,10 +7,15 @@ import LogoMobileIcon from "@/icons/logo-mobile.svg";
 import ChevronDownIcon from "@/icons/icon-chevron-down.svg";
 import AddIcon from "@/icons/icon-add-task-mobile.svg";
 import Dropdown from "@/components/UI/Dropdown";
-import { setActiveModal } from "@/store/uiSlice";
+import { selectBoard, setActiveModal } from "@/store/uiSlice";
 import ModalEnum from "@/model/ModalEnum";
+import { useQuery } from "@tanstack/react-query";
+import Board from "@/model/Board";
 const Header = () => {
   const dipsatch = useDispatch();
+  const { data } = useQuery<{ boards: Board[] }>({ queryKey: ["boards"] });
+  const activeBoard = useSelector(selectBoard);
+
   return (
     <div className="flex  items-center justify-between  ">
       {/* Desktop Header */}
@@ -25,6 +30,7 @@ const Header = () => {
             <Button
               label="+ Add New Task"
               type="primary large"
+              disabled={data?.boards?.[activeBoard]?.columns.length === 0}
               onClick={() => dipsatch(setActiveModal(ModalEnum.CREATE_TASK))}
             />
             <Dropdown

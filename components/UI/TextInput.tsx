@@ -28,6 +28,13 @@ const TextInput = forwardRef<ImperativeInput, TextInputProps>(
       },
     }));
 
+    const handleChange = (e: React.FormEvent<HTMLInputElement>) => {
+      e.stopPropagation();
+      if (error) {
+        setError("");
+      }
+      onChange(e);
+    };
     return (
       <div className="w-full">
         {label && (
@@ -51,7 +58,7 @@ const TextInput = forwardRef<ImperativeInput, TextInputProps>(
                 : "dark:border-black1 border-black border-opacity-25"
             }`}
             placeholder={placeholder}
-            onChange={onChange}
+            onChange={handleChange}
             required
           />
           {error && (

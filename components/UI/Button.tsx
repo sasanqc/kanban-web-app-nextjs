@@ -3,11 +3,21 @@ interface ButtonProps {
   classes?: string;
   label: string;
   type: string;
+  disabled?: boolean;
 }
-const Button: React.FC<ButtonProps> = ({ label, type, classes, onClick }) => {
+const Button: React.FC<ButtonProps> = ({
+  label,
+  type,
+  classes,
+  onClick,
+  disabled,
+}) => {
   return (
     <button
-      className={`text-lg   rounded-full  px-6 font-bold cursor-pointer  transition-colors ${classes} ${
+      disabled={disabled}
+      className={`text-lg   rounded-full  px-6 font-bold   transition-colors ${
+        disabled ? "opacity-25 cursor-not-allowed" : "cursor-pointer"
+      } ${classes} ${
         type?.includes("primary")
           ? "text-white bg-primary2 hover:bg-primary1"
           : ""

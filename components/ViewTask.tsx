@@ -3,6 +3,9 @@ import Select from "./UI/Select";
 import Checkbox from "./UI/Checkbox";
 import Task from "@/model/Task";
 import Dropdown from "./UI/Dropdown";
+import { useDispatch } from "react-redux";
+import { setActiveModal } from "@/store/uiSlice";
+import ModalEnum from "@/model/ModalEnum";
 
 interface ViewTaskProps {
   task: Task;
@@ -19,6 +22,8 @@ const ViewTask: React.FC<ViewTaskProps> = ({
   handleChangeTaskStatus,
   onDeleteTask,
 }) => {
+  const dispatch = useDispatch();
+
   const [editedTask, setEditedTask] = useState(task);
 
   const onChangeSubtask = (index: number, isComleted: boolean) => {
@@ -34,6 +39,9 @@ const ViewTask: React.FC<ViewTaskProps> = ({
     setEditedTask(updatedTask);
     handleChangeTaskStatus(value);
   };
+  const onClickEditTask = () => {
+    dispatch(setActiveModal(ModalEnum.EDIT_TASK));
+  };
   useEffect(() => {
     setEditedTask(task);
     return () => {};
@@ -47,7 +55,7 @@ const ViewTask: React.FC<ViewTaskProps> = ({
           items={[
             {
               label: "Edit Task",
-              onClick: () => {},
+              onClick: onClickEditTask,
               className: "text-gray3",
             },
             {

@@ -24,6 +24,21 @@
     letter-spacing: 2.4px;
   }
 }
+
 .modal-content {
   @apply w-full md:min-w-[480px]  bg-white dark:bg-black2 p-8 rounded-md;
+}
+
+.app-container {
+  @apply flex-1 flex overflow-auto  relative;
+}
+.app-container--visible {
+  width: calc(100%);
+  left: 0px;
+  transition: all 0.5s ease;
+}
+.app-container--hidden {
+  width: calc(100% + 300px);
+  left: -300px;
+  transition: all 0.5s ease;
 }

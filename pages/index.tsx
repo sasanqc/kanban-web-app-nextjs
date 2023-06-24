@@ -26,6 +26,8 @@ import { useUpdateBoard } from "@/hooks/useUpdateBoard";
 
 import ModalEnum from "@/model/ModalEnum";
 import Task from "@/model/Task";
+import EditTask from "@/components/EditTask";
+
 interface HomeProps {
   prefetchedData: { boards: Board[] };
 }
@@ -49,7 +51,6 @@ const Home: React.FC<HomeProps> = ({ prefetchedData = { boards: [] } }) => {
     html?.classList.add(localStorage.getItem("theme") || "light");
     return () => {};
   }, []);
-  console.log("render home page");
 
   const handleAddNewTask = (task: Task) => {
     const status = task.status;
@@ -80,6 +81,36 @@ const Home: React.FC<HomeProps> = ({ prefetchedData = { boards: [] } }) => {
     const board = { ...boards[activeBoard] };
     if (openedTask) {
       board.columns[openedTask.colIndex].tasks[openedTask.taskIndex] = task;
+      updateBoard({ id: activeBoard.toString(), board });
+    }
+  };
+
+  const handleEditTask = (task: Task) => {
+    const board = { ...boards[activeBoard] };
+
+    if (openedTask) {
+      // get a copy of the old task.
+      const oldTask =
+        board.columns[openedTask.colIndex].tasks[openedTask.taskIndex];
+
+      //check if status has changed
+      const statusIsChanged = oldTask.status !== task.status;
+
+      if (!statusIsChanged) {
+        board.columns[openedTask.colIndex].tasks[openedTask.taskIndex] = task;
+        updateBoard({ id: activeBoard.toString(), board });
+        return;
+      }
+
+      // if status has changed remove it from previous col and add it to the new col
+      board.columns[openedTask.colIndex].tasks.splice(openedTask.taskIndex, 1);
+      //add the task to target column. first find it's index
+      const targetColIndex = board.columns.findIndex(
+        (el: { name: string; tasks: Task[] }) => el.name === task.status
+      );
+      if (targetColIndex > -1) {
+        board.columns[targetColIndex].tasks.push(task);
+      }
       updateBoard({ id: activeBoard.toString(), board });
     }
   };
@@ -125,10 +156,10 @@ const Home: React.FC<HomeProps> = ({ prefetchedData = { boards: [] } }) => {
   };
 
   return (
-    <main className="text-black dark:text-white bg-white dark:bg-black2 w-screen h-screen flex">
-      <div className="flex flex-col overflow-hidden flex-1">
+    <main className="text-black dark:text-white bg-white dark:bg-black2 h-screen flex">
+      <div className="flex flex-col overflow-hidden w-full">
         <Header />
-        <div className="flex-1 flex overflow-auto w-full">
+        <div className="app-container app-container--visible">
           <Sidebar />
           <Tasks board={boards[activeBoard]} />
         </div>
@@ -178,7 +209,30 @@ const Home: React.FC<HomeProps> = ({ prefetchedData = { boards: [] } }) => {
         </Modal>
       )}
 
-      {openedTask && !(activeModal === ModalEnum.DELETE_TASK) && (
+      {openedTask && activeModal === ModalEnum.EDIT_TASK && (
+        <Modal
+          onClickBackdrop={() => {
+            dispatch(setActiveModal(undefined));
+            dispatch(setOpenedTask(undefined));
+          }}
+        >
+          <EditTask
+            task={
+              boards[activeBoard].columns[openedTask.colIndex].tasks[
+                openedTask.taskIndex
+              ]
+            }
+            columns={boards[activeBoard].columns.map(
+              (col: { name: string; tasks: Task[] }) => {
+                return { label: col.name, value: col.name };
+              }
+            )}
+            onEditTask={handleEditTask}
+          />
+        </Modal>
+      )}
+
+      {openedTask && activeModal === ModalEnum.VIEW_TASK && (
         <Modal
           onClickBackdrop={() => {
             dispatch(setActiveModal(undefined));
