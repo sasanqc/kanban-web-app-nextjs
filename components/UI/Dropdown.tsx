@@ -2,8 +2,9 @@ import React, { useRef, useState, useEffect } from "react";
 import VerticalElipsisIcon from "@/icons/icon-vertical-ellipsis.svg";
 interface DropdownProps {
   items: { label: string; className: string; onClick: () => void }[];
+  disable?: boolean;
 }
-const Dropdown: React.FC<DropdownProps> = ({ items }) => {
+const Dropdown: React.FC<DropdownProps> = ({ items, disable = false }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [menuIsOpoen, setMenuIsOpen] = useState(false);
   const handleClickedOnBackdrop = (e: MouseEvent) => {
@@ -23,8 +24,13 @@ const Dropdown: React.FC<DropdownProps> = ({ items }) => {
   return (
     <div className="relative z-30" ref={menuRef}>
       <div
-        className="cursor-pointer p-2 dark:hover:bg-black1  hover:bg-gray1 rounded-md transition"
-        onClick={() => setMenuIsOpen(true)}
+        className={`${
+          disable ? "cursor-not-allowed" : "cursor-pointer"
+        } p-2 dark:hover:bg-black1  hover:bg-gray1 rounded-md transition`}
+        onClick={() => {
+          if (disable) return;
+          setMenuIsOpen(true);
+        }}
       >
         <VerticalElipsisIcon />
       </div>

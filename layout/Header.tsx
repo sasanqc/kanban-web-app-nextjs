@@ -35,6 +35,7 @@ const Header = () => {
               onClick={() => dispatch(setActiveModal(ModalEnum.CREATE_TASK))}
             />
             <Dropdown
+              disable={data?.boards.length === 0}
               items={[
                 {
                   label: "Edit Board",
@@ -77,6 +78,7 @@ const Header = () => {
             <AddIcon />
           </button>
           <Dropdown
+            disable={data?.boards.length === 0}
             items={[
               {
                 label: "Edit Board",
