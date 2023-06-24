@@ -14,7 +14,9 @@ const Header = () => {
   const dispatch = useDispatch();
   const { data } = useQuery<{ boards: Board[] }>({ queryKey: ["boards"] });
   const activeBoard = useSelector(selectBoard);
-
+  const isDisables =
+    data?.boards?.length === 0 ||
+    data?.boards?.[activeBoard]?.columns.length === 0;
   return (
     <div className="flex  items-center justify-between  ">
       {/* Desktop Header */}
@@ -29,7 +31,7 @@ const Header = () => {
             <Button
               label="+ Add New Task"
               type="primary large"
-              disabled={data?.boards?.[activeBoard]?.columns.length === 0}
+              disabled={isDisables}
               onClick={() => dispatch(setActiveModal(ModalEnum.CREATE_TASK))}
             />
             <Dropdown
@@ -64,10 +66,13 @@ const Header = () => {
         </div>
         <div className="flex items-center gap-x-4">
           <button
-            className="bg-primary2 py-4 px-6 rounded-full"
+            className={`bg-primary2 py-4 px-6 rounded-full ${
+              isDisables ? "opacity-25 cursor-not-allowed" : ""
+            }`}
             onClick={() => {
               dispatch(setActiveModal(ModalEnum.CREATE_TASK));
             }}
+            disabled={isDisables}
           >
             <AddIcon />
           </button>
