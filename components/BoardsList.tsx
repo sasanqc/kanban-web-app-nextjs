@@ -17,10 +17,15 @@ const BoardsList: React.FC<BoardListProps> = ({ boards }) => {
         {boards.map((board, i) => (
           <li
             key={i}
-            className={`flex pl-8 py-4 gap-x-4 mr-6 items-center   rounded-r-full cursor-pointer  ${
-              activeBoard === i ? "bg-primary2 text-white" : "text-gray3"
+            className={`flex pl-8 py-4 gap-x-4 mr-6 items-center   rounded-r-full cursor-pointer animate-opacity ${
+              activeBoard === i
+                ? "bg-primary2 text-white animate-opacityAnimate"
+                : "text-gray3"
             }`}
-            onClick={() => dispatch(setActiveBoard(i))}
+            onClick={() => {
+              dispatch(setActiveBoard(i));
+              dispatch(setActiveModal(undefined));
+            }}
           >
             <span>
               <BoardIcon />

@@ -6,5 +6,6 @@ enum ModalEnum {
   DELETE_BOARD = "DELETE_BOARD",
   DELETE_TASK = "DELETE_TASK",
   VIEW_TASK = "VIEW_TASK",
+  MOBILE_MENU = "MOBILE_MENU",
 }
 export default ModalEnum;

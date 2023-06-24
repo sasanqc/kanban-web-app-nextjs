@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   selectBoard,
   selectModal,
+  selectSidebar,
   selectTask,
   setActiveModal,
   setOpenedTask,
@@ -27,6 +28,8 @@ import { useUpdateBoard } from "@/hooks/useUpdateBoard";
 import ModalEnum from "@/model/ModalEnum";
 import Task from "@/model/Task";
 import EditTask from "@/components/EditTask";
+import { DropResult, resetServerContext } from "react-beautiful-dnd";
+import MobileBoards from "@/components/MobileBoards";
 
 interface HomeProps {
   prefetchedData: { boards: Board[] };
@@ -37,7 +40,7 @@ const Home: React.FC<HomeProps> = ({ prefetchedData = { boards: [] } }) => {
 
   const activeModal = useSelector(selectModal);
   const openedTask = useSelector(selectTask);
-
+  const sidebarIsOpen = useSelector(selectSidebar);
   //remote states
 
   const { isDeleting, deleteBoard } = useDeleteBoard();
@@ -155,13 +158,58 @@ const Home: React.FC<HomeProps> = ({ prefetchedData = { boards: [] } }) => {
     }
   };
 
+  const reorder = (list: Task[], startIndex: number, endIndex: number) => {
+    const result = Array.from(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+
+    return result;
+  };
+
+  const handleDragEnd = ({ source, destination }: DropResult) => {
+    if (!destination) {
+      return;
+    }
+
+    const board = { ...boards[activeBoard] };
+
+    const srcCol = parseInt(source.droppableId);
+    const desCol = parseInt(destination.droppableId);
+
+    if (srcCol === desCol) {
+      const updatedTasks = reorder(
+        [...board.columns[srcCol].tasks],
+        source.index,
+        destination.index
+      );
+      board.columns[srcCol].tasks = updatedTasks;
+      updateBoard({ id: activeBoard.toString(), board });
+
+      return;
+    }
+    //add to destionation col
+    board.columns[desCol].tasks.splice(
+      destination.index,
+      0,
+      board.columns[srcCol].tasks[source.index]
+    );
+
+    //remove task from src
+    board.columns[srcCol].tasks.splice(source.index, 1);
+    updateBoard({ id: activeBoard.toString(), board });
+  };
+
   return (
     <main className="text-black dark:text-white bg-white dark:bg-black2 h-screen flex">
       <div className="flex flex-col overflow-hidden w-full">
         <Header />
-        <div className="app-container app-container--visible">
+        <div
+          className={`app-container ${
+            sidebarIsOpen ? "app-container--visible" : "app-container--hidden"
+          }`}
+        >
           <Sidebar />
-          <Tasks board={boards[activeBoard]} />
+          <Tasks onDragEnd={handleDragEnd} />
         </div>
       </div>
       {activeModal === ModalEnum.CREATE_BOARD && (
@@ -274,13 +322,22 @@ const Home: React.FC<HomeProps> = ({ prefetchedData = { boards: [] } }) => {
           />
         </Modal>
       )}
+      {activeModal === ModalEnum.MOBILE_MENU && (
+        <Modal
+          center={false}
+          onClickBackdrop={() => dispatch(setActiveModal(undefined))}
+        >
+          <MobileBoards />
+        </Modal>
+      )}
     </main>
   );
 };
 
 export default Home;
 
-export async function getStaticProps() {
+export async function getServerSideProps() {
   const prefetchedData = getData();
+  resetServerContext();
   return { props: { prefetchedData } };
 }

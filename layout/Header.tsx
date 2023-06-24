@@ -1,6 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
 import Button from "../components/UI/Button";
-import VerticalElipsisIcon from "@/icons/icon-vertical-ellipsis.svg";
 import LogoDarkIcon from "@/icons/logo-dark.svg";
 import LogoLightIcon from "@/icons/logo-light.svg";
 import LogoMobileIcon from "@/icons/logo-mobile.svg";
@@ -12,7 +11,7 @@ import ModalEnum from "@/model/ModalEnum";
 import { useQuery } from "@tanstack/react-query";
 import Board from "@/model/Board";
 const Header = () => {
-  const dipsatch = useDispatch();
+  const dispatch = useDispatch();
   const { data } = useQuery<{ boards: Board[] }>({ queryKey: ["boards"] });
   const activeBoard = useSelector(selectBoard);
 
@@ -31,19 +30,19 @@ const Header = () => {
               label="+ Add New Task"
               type="primary large"
               disabled={data?.boards?.[activeBoard]?.columns.length === 0}
-              onClick={() => dipsatch(setActiveModal(ModalEnum.CREATE_TASK))}
+              onClick={() => dispatch(setActiveModal(ModalEnum.CREATE_TASK))}
             />
             <Dropdown
               items={[
                 {
                   label: "Edit Board",
-                  onClick: () => dipsatch(setActiveModal(ModalEnum.EDIT_BOARD)),
+                  onClick: () => dispatch(setActiveModal(ModalEnum.EDIT_BOARD)),
                   className: "text-gray3",
                 },
                 {
                   label: "Delete Board",
                   onClick: () =>
-                    dipsatch(setActiveModal(ModalEnum.DELETE_BOARD)),
+                    dispatch(setActiveModal(ModalEnum.DELETE_BOARD)),
                   className: "text-destructive2",
                 },
               ]}
@@ -53,18 +52,39 @@ const Header = () => {
       </div>
       {/* Mobile Header */}
       <div className="sm:hidden  items-center justify-between  w-full flex px-4 py-5">
-        <div className="flex">
+        <div
+          className="flex"
+          onClick={() => dispatch(setActiveModal(ModalEnum.MOBILE_MENU))}
+        >
           <LogoMobileIcon className="mr-4" />
           <div className="flex items-center gap-x-2">
-            <h2 className="">Platform Launch</h2>
+            <h2 className="">{data?.boards?.[activeBoard]?.name}</h2>
             <ChevronDownIcon />
           </div>
         </div>
         <div className="flex items-center gap-x-4">
-          <button className="bg-primary2 py-4 px-6 rounded-full">
+          <button
+            className="bg-primary2 py-4 px-6 rounded-full"
+            onClick={() => {
+              dispatch(setActiveModal(ModalEnum.CREATE_TASK));
+            }}
+          >
             <AddIcon />
           </button>
-          <VerticalElipsisIcon className="mr-2 cursor-pointer" />
+          <Dropdown
+            items={[
+              {
+                label: "Edit Board",
+                onClick: () => dispatch(setActiveModal(ModalEnum.EDIT_BOARD)),
+                className: "text-gray3",
+              },
+              {
+                label: "Delete Board",
+                onClick: () => dispatch(setActiveModal(ModalEnum.DELETE_BOARD)),
+                className: "text-destructive2",
+              },
+            ]}
+          />
         </div>
       </div>
     </div>

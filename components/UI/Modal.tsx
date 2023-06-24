@@ -14,7 +14,6 @@ const Modal: React.FC<ModalProps> = ({
 
   const backDropHandler = useCallback((e: MouseEvent) => {
     if (!modalRef?.current?.contains(e.target as Node)) {
-      console.log("on Clicked Backdrop");
       onClickBackdrop();
     }
   }, []);
@@ -29,10 +28,12 @@ const Modal: React.FC<ModalProps> = ({
   }, [backDropHandler]);
 
   return (
-    <div className=" w-screen h-screen absolute top-0 left-0 z-10 bg-[#00000080]">
+    <div className=" w-screen h-screen absolute top-0 left-0 z-10 bg-[#00000080] ">
       <div
-        className={`w-full  md:w-fit  md:left-1/2 absolute md:-translate-x-1/2 px-4 ${
-          center ? "top-1/2 -translate-y-1/2" : "top-24"
+        className={`w-full  md:w-[480px]  md:left-1/2 absolute md:-translate-x-1/2 px-4  ${
+          center
+            ? "top-1/2 -translate-y-1/2 animate-fadeIn"
+            : "top-24 animate-fadeInMobile"
         }`}
         ref={modalRef}
       >

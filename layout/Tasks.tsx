@@ -1,14 +1,15 @@
+import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import TaskColumn from "@/components/TaskColumn";
 import Button from "@/components/UI/Button";
 import { useBoard } from "@/hooks/useBoard";
-import Board from "@/model/Board";
 import ModalEnum from "@/model/ModalEnum";
 import Task from "@/model/Task";
 import { selectBoard, setActiveModal, setOpenedTask } from "@/store/uiSlice";
-import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-const Tasks: React.FC<{ board: Board }> = () => {
+const Tasks: React.FC<{
+  onDragEnd: (result: DropResult) => void;
+}> = ({ onDragEnd }) => {
   const dispatch = useDispatch();
   const activeBoard = useSelector(selectBoard);
   const board = useBoard({ boards: [] })?.[activeBoard];
@@ -19,22 +20,26 @@ const Tasks: React.FC<{ board: Board }> = () => {
 
   return (
     <div className="flex-1 h-full  p-6 flex gap-6 overflow-auto flex-nowrap bg-white2 dark:bg-black3 border-t border-t-gray1 dark:border-t-black1">
-      {board?.columns?.map(
-        (col: { name: string; tasks: Task[] }, index: number) => (
-          <TaskColumn
-            col={col}
-            key={index}
-            onClickedTask={(taskIndex: number) =>
-              onClickedTask(index, taskIndex)
-            }
-          />
-        )
-      )}
+      <DragDropContext onDragEnd={onDragEnd}>
+        {board?.columns?.map(
+          (col: { name: string; tasks: Task[] }, index: number) => (
+            <TaskColumn
+              col={col}
+              id={index.toString()}
+              key={index}
+              onClickedTask={(taskIndex: number) =>
+                onClickedTask(index, taskIndex)
+              }
+            />
+          )
+        )}
+      </DragDropContext>
+
       {board?.columns?.length > 0 && (
         <div className="bg-gray1 dark:bg-black2 text-center mt-10 flex rounded-md">
           <h1
             onClick={() => dispatch(setActiveModal(ModalEnum.EDIT_BOARD))}
-            className="text-gray3 w-[280px] my-auto cursor-pointer hover:text-gray1 transition-colors"
+            className="text-gray3 w-[280px] my-auto cursor-pointer hover:text-gray2 transition-colors"
           >
             + New Column
           </h1>

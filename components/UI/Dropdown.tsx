@@ -23,7 +23,7 @@ const Dropdown: React.FC<DropdownProps> = ({ items }) => {
   return (
     <div className="relative z-30" ref={menuRef}>
       <div
-        className="cursor-pointer p-2 hover:bg-black1 rounded-md transition"
+        className="cursor-pointer p-2 dark:hover:bg-black1  hover:bg-gray1 rounded-md transition"
         onClick={() => setMenuIsOpen(true)}
       >
         <VerticalElipsisIcon />
