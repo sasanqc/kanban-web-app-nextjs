@@ -15,6 +15,7 @@ import {
   setActiveModal,
   setOpenedTask,
 } from "@/store/uiSlice";
+
 import CreateBoard from "@/components/CreateBoard";
 import CreateTask from "@/components/CreateTask";
 import Delete from "@/components/Delete";
@@ -30,6 +31,9 @@ import Task from "@/model/Task";
 import EditTask from "@/components/EditTask";
 import { DropResult, resetServerContext } from "react-beautiful-dnd";
 import MobileBoards from "@/components/MobileBoards";
+import connectMongo from "@/database/connectMongo";
+import BoardsModel from "@/database/data";
+import Spinner from "@/components/UI/Spinner";
 
 interface HomeProps {
   prefetchedData: { boards: Board[] };
@@ -146,6 +150,7 @@ const Home: React.FC<HomeProps> = ({ prefetchedData = { boards: [] } }) => {
           colIndex: targetColIndex,
         })
       );
+
       //finally update global state of boards
       updateBoard(
         { id: activeBoard.toString(), board },
@@ -162,7 +167,6 @@ const Home: React.FC<HomeProps> = ({ prefetchedData = { boards: [] } }) => {
     const result = Array.from(list);
     const [removed] = result.splice(startIndex, 1);
     result.splice(endIndex, 0, removed);
-
     return result;
   };
 
@@ -187,6 +191,7 @@ const Home: React.FC<HomeProps> = ({ prefetchedData = { boards: [] } }) => {
 
       return;
     }
+
     //add to destionation col
     board.columns[desCol].tasks.splice(
       destination.index,
@@ -211,6 +216,8 @@ const Home: React.FC<HomeProps> = ({ prefetchedData = { boards: [] } }) => {
           <Sidebar />
           <Tasks onDragEnd={handleDragEnd} />
         </div>
+        {/* liading spinner */}
+        {(isDeleting || isUpdating || isCreating) && <Spinner />}
       </div>
       {activeModal === ModalEnum.CREATE_BOARD && (
         <Modal onClickBackdrop={() => dispatch(setActiveModal(undefined))}>
@@ -322,6 +329,7 @@ const Home: React.FC<HomeProps> = ({ prefetchedData = { boards: [] } }) => {
           />
         </Modal>
       )}
+
       {activeModal === ModalEnum.MOBILE_MENU && (
         <Modal
           center={false}
@@ -337,7 +345,20 @@ const Home: React.FC<HomeProps> = ({ prefetchedData = { boards: [] } }) => {
 export default Home;
 
 export async function getServerSideProps() {
-  const prefetchedData = getData();
+  await connectMongo();
+  const data = await BoardsModel.find();
+  let prefetchedData;
+
+  //if there is no data in data base read data.json file and fill it with it.
+  if (data.length === 0) {
+    prefetchedData = getData();
+    await BoardsModel.create(prefetchedData);
+  } else {
+    const dbData = await BoardsModel.find();
+    prefetchedData = JSON.parse(JSON.stringify(dbData[0]));
+    console.log(prefetchedData);
+  }
+
   resetServerContext();
   return { props: { prefetchedData } };
 }

@@ -14,29 +14,29 @@ module.exports = {
       lg: "976px",
       xl: "1440px",
     },
-    animation: {
-      fadeIn: "fadeIn 100ms linear",
-      fadeInMobile: "fadeInMobile 100ms linear",
-      opacityAnimate: "opacityAnimate 300ms ease",
-    },
-    keyframes: {
-      fadeIn: {
-        "0%": { top: "49%", opacity: "0.3" },
-        "100%": { top: "50%", opacity: "1" },
-      },
-      fadeInMobile: {
-        "0%": { top: "90px", opacity: "0.3" },
-        "100%": { top: "96px", opacity: "1" },
-      },
-      opacityAnimate: {
-        "0%": { opacity: "0" },
-        "100%": { opacity: "1" },
-      },
-    },
 
     extend: {
       boxShadow: {
         task: "0px 4px 6px rgba(54, 78, 126, 0.101545)",
+      },
+      animation: {
+        fadeIn: "fadeIn 100ms linear",
+        fadeInMobile: "fadeInMobile 100ms linear",
+        opacityAnimate: "opacityAnimate 300ms ease",
+      },
+      keyframes: {
+        fadeIn: {
+          "0%": { top: "49%", opacity: "0.3" },
+          "100%": { top: "50%", opacity: "1" },
+        },
+        fadeInMobile: {
+          "0%": { top: "90px", opacity: "0.3" },
+          "100%": { top: "96px", opacity: "1" },
+        },
+        opacityAnimate: {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
       },
     },
     fontSize: {
