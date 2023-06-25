@@ -34,6 +34,7 @@ import MobileBoards from "@/components/MobileBoards";
 import connectMongo from "@/database/connectMongo";
 import BoardsModel from "@/database/data";
 import Spinner from "@/components/UI/Spinner";
+import Head from "next/head";
 
 interface HomeProps {
   prefetchedData: { boards: Board[] };
@@ -205,140 +206,147 @@ const Home: React.FC<HomeProps> = ({ prefetchedData = { boards: [] } }) => {
   };
 
   return (
-    <main className="text-black dark:text-white bg-white dark:bg-black2 h-screen flex">
-      <div className="flex flex-col overflow-hidden w-full">
-        <Header />
-        <div
-          className={`app-container ${
-            sidebarIsOpen ? "app-container--visible" : "app-container--hidden"
-          }`}
-        >
-          <Sidebar />
-          <Tasks onDragEnd={handleDragEnd} />
+    <>
+      <Head>
+        <title>Kanban webapp</title>
+      </Head>
+      <main className="text-black dark:text-white bg-white dark:bg-black2 h-screen flex">
+        <div className="flex flex-col overflow-hidden w-full">
+          <Header />
+          <div
+            className={`app-container ${
+              sidebarIsOpen ? "app-container--visible" : "app-container--hidden"
+            }`}
+          >
+            <Sidebar />
+            <Tasks onDragEnd={handleDragEnd} />
+          </div>
+          {/* liading spinner */}
+          {(isDeleting || isUpdating || isCreating) && <Spinner />}
         </div>
-        {/* liading spinner */}
-        {(isDeleting || isUpdating || isCreating) && <Spinner />}
-      </div>
-      {activeModal === ModalEnum.CREATE_BOARD && (
-        <Modal onClickBackdrop={() => dispatch(setActiveModal(undefined))}>
-          <CreateBoard onCreateBoard={(board: Board) => createBoard(board)} />
-        </Modal>
-      )}
+        {activeModal === ModalEnum.CREATE_BOARD && (
+          <Modal onClickBackdrop={() => dispatch(setActiveModal(undefined))}>
+            <CreateBoard onCreateBoard={(board: Board) => createBoard(board)} />
+          </Modal>
+        )}
 
-      {activeModal === ModalEnum.EDIT_BOARD && (
-        <Modal onClickBackdrop={() => dispatch(setActiveModal(undefined))}>
-          <EditBoard
-            board={boards?.[activeBoard]}
-            onEditBoard={(board: Board) =>
-              updateBoard({ id: activeBoard.toString(), board })
-            }
-          />
-        </Modal>
-      )}
-
-      {activeModal === ModalEnum.DELETE_BOARD && (
-        <Modal onClickBackdrop={() => dispatch(setActiveModal(undefined))}>
-          <Delete
-            title="Delete this board?"
-            description={`Are you sure you want to delete the ‘${boards[activeBoard].name}’ board? This action will remove all columns and tasks and cannot be reversed.`}
-            onCancel={() => dispatch(setActiveModal(undefined))}
-            onConfirm={() => deleteBoard(activeBoard.toString())}
-          />
-        </Modal>
-      )}
-
-      {activeModal === ModalEnum.CREATE_TASK && (
-        <Modal
-          onClickBackdrop={() => {
-            dispatch(setActiveModal(undefined));
-          }}
-        >
-          <CreateTask
-            columns={boards[activeBoard].columns.map(
-              (col: { name: string; tasks: Task[] }) => {
-                return { label: col.name, value: col.name };
+        {activeModal === ModalEnum.EDIT_BOARD && (
+          <Modal onClickBackdrop={() => dispatch(setActiveModal(undefined))}>
+            <EditBoard
+              board={boards?.[activeBoard]}
+              onEditBoard={(board: Board) =>
+                updateBoard({ id: activeBoard.toString(), board })
               }
-            )}
-            onCreateTask={handleAddNewTask}
-          />
-        </Modal>
-      )}
+            />
+          </Modal>
+        )}
 
-      {openedTask && activeModal === ModalEnum.EDIT_TASK && (
-        <Modal
-          onClickBackdrop={() => {
-            dispatch(setActiveModal(undefined));
-            dispatch(setOpenedTask(undefined));
-          }}
-        >
-          <EditTask
-            task={
-              boards[activeBoard].columns[openedTask.colIndex].tasks[
-                openedTask.taskIndex
-              ]
-            }
-            columns={boards[activeBoard].columns.map(
-              (col: { name: string; tasks: Task[] }) => {
-                return { label: col.name, value: col.name };
-              }
-            )}
-            onEditTask={handleEditTask}
-          />
-        </Modal>
-      )}
+        {activeModal === ModalEnum.DELETE_BOARD && (
+          <Modal onClickBackdrop={() => dispatch(setActiveModal(undefined))}>
+            <Delete
+              title="Delete this board?"
+              description={`Are you sure you want to delete the ‘${boards[activeBoard].name}’ board? This action will remove all columns and tasks and cannot be reversed.`}
+              onCancel={() => dispatch(setActiveModal(undefined))}
+              onConfirm={() => deleteBoard(activeBoard.toString())}
+            />
+          </Modal>
+        )}
 
-      {openedTask && activeModal === ModalEnum.VIEW_TASK && (
-        <Modal
-          onClickBackdrop={() => {
-            dispatch(setActiveModal(undefined));
-            dispatch(setOpenedTask(undefined));
-          }}
-        >
-          <ViewTask
-            task={
-              boards[activeBoard].columns[openedTask.colIndex].tasks[
-                openedTask.taskIndex
-              ]
-            }
-            columns={boards[activeBoard].columns.map(
-              (col: { name: string; tasks: Task[] }) => {
-                return { label: col.name, value: col.name };
-              }
-            )}
-            onChangeTask={handleChangeTask}
-            handleChangeTaskStatus={handleChangeTaskStatus}
-            onDeleteTask={() => dispatch(setActiveModal(ModalEnum.DELETE_TASK))}
-          />
-        </Modal>
-      )}
+        {activeModal === ModalEnum.CREATE_TASK && (
+          <Modal
+            onClickBackdrop={() => {
+              dispatch(setActiveModal(undefined));
+            }}
+          >
+            <CreateTask
+              columns={boards[activeBoard].columns.map(
+                (col: { name: string; tasks: Task[] }) => {
+                  return { label: col.name, value: col.name };
+                }
+              )}
+              onCreateTask={handleAddNewTask}
+            />
+          </Modal>
+        )}
 
-      {openedTask && activeModal === ModalEnum.DELETE_TASK && (
-        <Modal onClickBackdrop={() => dispatch(setOpenedTask(undefined))}>
-          <Delete
-            title="Delete this task?"
-            description={`Are you sure you want to delete the ‘${
-              boards[activeBoard].columns[openedTask.colIndex].tasks[
-                openedTask.taskIndex
-              ].title
-            }’ task and its subtasks? This action cannot be reversed.`}
-            onCancel={() => {
+        {openedTask && activeModal === ModalEnum.EDIT_TASK && (
+          <Modal
+            onClickBackdrop={() => {
               dispatch(setActiveModal(undefined));
               dispatch(setOpenedTask(undefined));
             }}
-            onConfirm={handleDeleteTask}
-          />
-        </Modal>
-      )}
+          >
+            <EditTask
+              task={
+                boards[activeBoard].columns[openedTask.colIndex].tasks[
+                  openedTask.taskIndex
+                ]
+              }
+              columns={boards[activeBoard].columns.map(
+                (col: { name: string; tasks: Task[] }) => {
+                  return { label: col.name, value: col.name };
+                }
+              )}
+              onEditTask={handleEditTask}
+            />
+          </Modal>
+        )}
 
-      {activeModal === ModalEnum.MOBILE_MENU && (
-        <Modal
-          center={false}
-          onClickBackdrop={() => dispatch(setActiveModal(undefined))}
-        >
-          <MobileBoards />
-        </Modal>
-      )}
-    </main>
+        {openedTask && activeModal === ModalEnum.VIEW_TASK && (
+          <Modal
+            onClickBackdrop={() => {
+              dispatch(setActiveModal(undefined));
+              dispatch(setOpenedTask(undefined));
+            }}
+          >
+            <ViewTask
+              task={
+                boards[activeBoard].columns[openedTask.colIndex].tasks[
+                  openedTask.taskIndex
+                ]
+              }
+              columns={boards[activeBoard].columns.map(
+                (col: { name: string; tasks: Task[] }) => {
+                  return { label: col.name, value: col.name };
+                }
+              )}
+              onChangeTask={handleChangeTask}
+              handleChangeTaskStatus={handleChangeTaskStatus}
+              onDeleteTask={() =>
+                dispatch(setActiveModal(ModalEnum.DELETE_TASK))
+              }
+            />
+          </Modal>
+        )}
+
+        {openedTask && activeModal === ModalEnum.DELETE_TASK && (
+          <Modal onClickBackdrop={() => dispatch(setOpenedTask(undefined))}>
+            <Delete
+              title="Delete this task?"
+              description={`Are you sure you want to delete the ‘${
+                boards[activeBoard].columns[openedTask.colIndex].tasks[
+                  openedTask.taskIndex
+                ].title
+              }’ task and its subtasks? This action cannot be reversed.`}
+              onCancel={() => {
+                dispatch(setActiveModal(undefined));
+                dispatch(setOpenedTask(undefined));
+              }}
+              onConfirm={handleDeleteTask}
+            />
+          </Modal>
+        )}
+
+        {activeModal === ModalEnum.MOBILE_MENU && (
+          <Modal
+            center={false}
+            onClickBackdrop={() => dispatch(setActiveModal(undefined))}
+          >
+            <MobileBoards />
+          </Modal>
+        )}
+      </main>
+    </>
   );
 };
 
