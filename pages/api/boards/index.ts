@@ -1,11 +1,10 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
-import dotenv from "dotenv";
+
 import Board from "@/model/Board";
 import { getData } from "@/utils/boards-fs";
 import BoardsModel from "@/database/data";
 import connectMongo from "@/database/connectMongo";
-dotenv.config({ path: "@/config.env" });
 
 export default async function handler(
   req: NextApiRequest,
